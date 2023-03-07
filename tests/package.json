@@ -1,0 +1,15 @@
+{
+    "devDependencies": {
+    "jest": "^26.1.0",
+    "jest-environment-jsdom-sixteen": "^1.0.3",
+    "jest-environment-node": "^26.1.0"
+  },
+  "scripts": {
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+  },
+  "type": "module",
+  "jest": {
+    "transform": {},
+    "testEnvironment": "jest-environment-jsdom-sixteen"
+  }
+}
