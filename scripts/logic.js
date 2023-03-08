@@ -1,4 +1,3 @@
-// Ship function
 export const Ship = (length) => {
   let hits = 0;
   let sunk = false;
@@ -15,7 +14,6 @@ export const Ship = (length) => {
   return { hits, length, sunk, hit, isSunk };
 };
 
-// Gameboard
 export const Gameboard = (size) => {
   const ships = [],
     coordinates = [];
@@ -55,7 +53,6 @@ export const Gameboard = (size) => {
   return { coordinates, place, receivedAttack, isGameOver };
 };
 
-// Player
 export const Player = () => {
   const randomAttack = (gameboard) => {
     let randomX, randomY;
