@@ -11,15 +11,12 @@ export const Ship = (length) => {
     return sunk;
   };
 
-  //   const checkHits = () => {
-  //     return hits;
-  //   };
-
-  return { hits, length, sunk, hit, isSunk, checkHits };
+  return { hits, length, sunk, hit, isSunk };
 };
 
 export const Gameboard = (size) => {
-  // Create gameboard
+  const ships = [];
+
   let board = [];
   for (let i = 0; i < size; i++) {
     let row = [];
@@ -33,6 +30,14 @@ export const Gameboard = (size) => {
     for (let i = y; i < y + ship.length; i++) {
       board[x][i] = ship;
     }
+    ships.push(ship);
+  };
+
+  const isGameOver = () => {
+    for (let ship of ships) {
+      if (!ship.isSunk()) return false;
+    }
+    return true;
   };
 
   const receivedAttack = (x, y) => {
@@ -44,9 +49,5 @@ export const Gameboard = (size) => {
     }
   };
 
-  const isGameOver = () => {
-    //
-  };
-
-  return { board, place, receivedAttack };
+  return { board, place, receivedAttack, isGameOver };
 };

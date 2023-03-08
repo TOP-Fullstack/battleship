@@ -23,18 +23,16 @@ it("should hit a ship", () => {
   expect(gameboard.board[2][5]).toBe(1);
 });
 
-// it("should have 1 added to the hits of the ship that was hit", () => {
-//   expect(newShip.checkHits()).toBe(1);
-// });
-
 it("should miss a ship", () => {
   gameboard.receivedAttack(5, 5);
   expect(gameboard.board[5][5]).toBe(0);
 });
 
-// Gameboards should be able to report whether or not
-// all ships have been sunk
-// it("should be a game over", () => {
-//   gameboard.receivedAttack(2, 6);
-//   expect(gameboard.isGameOver()).toBe(true);
-// });
+it("shouldn't be a game over", () => {
+  expect(gameboard.isGameOver()).toBe(false);
+});
+
+it("should be a game over", () => {
+  gameboard.receivedAttack(2, 6);
+  expect(gameboard.isGameOver()).toBe(true);
+});
