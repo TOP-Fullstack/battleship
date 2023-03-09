@@ -1,3 +1,5 @@
+// import { render } from "./render.js";
+
 export const Ship = (length) => {
   let hits = 0;
   let sunk = false;
@@ -18,7 +20,7 @@ export const Gameboard = (size) => {
   const ships = [],
     coordinates = [];
 
-  // Initialize board
+  // Logic board
   for (let i = 0; i < size; i++) {
     let row = [];
     for (let j = 0; j < size; j++) {
@@ -27,6 +29,29 @@ export const Gameboard = (size) => {
     coordinates.push(row);
   }
 
+  // Dom board
+  let board = document.createElement("div");
+  const render = () => {
+    for (let y = 0; y < coordinates.length; y++) {
+      for (let x = 0; x < coordinates.length; x++) {
+        let boardSquare = document.createElement("div");
+        boardSquare.addEventListener("click", () => {
+          console.log("test");
+        });
+        board.appendChild(boardSquare);
+      }
+      board.className = "grid";
+      document.body.appendChild(board);
+    }
+  };
+
+  const update = () => {
+    board.remove();
+    let board = document.createElement("div");
+    render();
+  };
+
+  // Currently place it starting from the point clicked and iterate to the right by length
   const place = (x, y, ship) => {
     for (let i = y; i < y + ship.length; i++) {
       coordinates[x][i] = ship;
@@ -50,10 +75,12 @@ export const Gameboard = (size) => {
     }
   };
 
-  return { coordinates, place, receivedAttack, isGameOver };
+  return { coordinates, place, receivedAttack, isGameOver, update, render };
 };
 
 export const Player = () => {
+  const board = Gameboard(10);
+
   const randomAttack = (gameboard) => {
     let randomX, randomY;
     do {
@@ -61,33 +88,37 @@ export const Player = () => {
       randomY = Math.floor(Math.random() * gameboard.coordinates.length);
     } while (gameboard.coordinates[randomX][randomY] != "");
     gameboard.receivedAttack(randomX, randomY);
+    gameboard.update();
   };
 
   // User attack
   const attack = (x, y, gameboard) => {
     gameboard.receivedAttack(x, y);
+    gameboard.update();
   };
 
-  return { attack, randomAttack };
+  return { attack, randomAttack, board };
 };
 
-// Main game loop
 export const Game = () => {
   // Initialize user's board
   const user = Player();
-  user.board = Gameboard(10);
   const userShip1 = Ship(3);
   const userShip2 = Ship(2);
   user.board.place(0, 5, userShip1);
   user.board.place(6, 1, userShip2);
+  user.board.render();
 
   // Initialize computer's board
   const computer = Player();
-  computer.board = Gameboard(10);
   const compShip1 = Ship(3);
   const compShip2 = Ship(2);
-  computer.board.place(0, 5, compShip1);
-  computer.board.place(6, 1, compShip2);
+  computer.board.place(3, 2, compShip1);
+  computer.board.place(1, 4, compShip2);
+  computer.board.render();
 
+  user.attack(4, 0, computer.board);
+
+  // Allow user to click enemy board
   return { user, computer };
 };
