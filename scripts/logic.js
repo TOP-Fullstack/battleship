@@ -18,38 +18,39 @@ export const Ship = (length) => {
 
 export const Gameboard = (size) => {
   const ships = [],
-    coordinates = [];
+    coordinates = [],
+    DOM = [];
 
   // Logic board
   for (let i = 0; i < size; i++) {
-    let row = [];
+    const row = [];
     for (let j = 0; j < size; j++) {
       row.push("");
     }
     coordinates.push(row);
   }
 
-  // Dom board
-  let board = document.createElement("div");
-  const render = () => {
-    for (let y = 0; y < coordinates.length; y++) {
-      for (let x = 0; x < coordinates.length; x++) {
-        let boardSquare = document.createElement("div");
-        boardSquare.addEventListener("click", () => {
-          console.log("test");
-        });
-        board.appendChild(boardSquare);
-      }
-      board.className = "grid";
-      document.body.appendChild(board);
-    }
+  const check = (piece, y, x) => {
+    if (coordinates[y][x] == "") piece.style.background = "black";
+    else if (coordinates[y][x] != "") piece.style.background = "red";
   };
 
-  const update = () => {
-    board.remove();
-    let board = document.createElement("div");
-    render();
-  };
+  // Dom board
+  const DOMboard = document.createElement("div");
+  DOMboard.className = "grid";
+  for (let i = 0; i < size; i++) {
+    const row = [];
+    for (let j = 0; j < size; j++) {
+      const DOMsquare = document.createElement("div");
+      DOMsquare.addEventListener("click", () => {
+        check(DOMsquare, i, j);
+      });
+      DOMboard.appendChild(DOMsquare);
+      row.push(DOMsquare);
+    }
+    DOM.push(row);
+  }
+  document.body.appendChild(DOMboard);
 
   // Currently place it starting from the point clicked and iterate to the right by length
   const place = (x, y, ship) => {
@@ -75,7 +76,7 @@ export const Gameboard = (size) => {
     }
   };
 
-  return { coordinates, place, receivedAttack, isGameOver, update, render };
+  return { coordinates, place, receivedAttack, isGameOver };
 };
 
 export const Player = () => {
@@ -88,13 +89,11 @@ export const Player = () => {
       randomY = Math.floor(Math.random() * gameboard.coordinates.length);
     } while (gameboard.coordinates[randomX][randomY] != "");
     gameboard.receivedAttack(randomX, randomY);
-    gameboard.update();
   };
 
   // User attack
   const attack = (x, y, gameboard) => {
     gameboard.receivedAttack(x, y);
-    gameboard.update();
   };
 
   return { attack, randomAttack, board };
@@ -107,7 +106,6 @@ export const Game = () => {
   const userShip2 = Ship(2);
   user.board.place(0, 5, userShip1);
   user.board.place(6, 1, userShip2);
-  user.board.render();
 
   // Initialize computer's board
   const computer = Player();
@@ -115,7 +113,6 @@ export const Game = () => {
   const compShip2 = Ship(2);
   computer.board.place(3, 2, compShip1);
   computer.board.place(1, 4, compShip2);
-  computer.board.render();
 
   user.attack(4, 0, computer.board);
 
