@@ -18,32 +18,32 @@ export const Ship = (length) => {
 
 export const Gameboard = (size) => {
   const ships = [],
-    coordinates = [],
+    coords = [],
     DOM = [];
 
   // Logic board
-  for (let i = 0; i < size; i++) {
+  for (let y = 0; y < size; y++) {
     const row = [];
-    for (let j = 0; j < size; j++) {
+    for (let x = 0; x < size; x++) {
       row.push("");
     }
-    coordinates.push(row);
+    coords.push(row);
   }
 
-  const check = (piece, y, x) => {
-    if (coordinates[y][x] == "") piece.style.background = "black";
-    else if (coordinates[y][x] != "") piece.style.background = "red";
+  const changeDOM = (y, x, piece) => {
+    if (coords[y][x] == "") piece.style.background = "black";
+    else if (coords[y][x] != "") piece.style.background = "red";
   };
 
-  // Dom board
+  // DOM board
   const DOMboard = document.createElement("div");
   DOMboard.className = "grid";
-  for (let i = 0; i < size; i++) {
+  for (let y = 0; y < size; y++) {
     const row = [];
-    for (let j = 0; j < size; j++) {
+    for (let x = 0; x < size; x++) {
       const DOMsquare = document.createElement("div");
       DOMsquare.addEventListener("click", () => {
-        check(DOMsquare, i, j);
+        changeDOM(y, x, DOMsquare);
       });
       DOMboard.appendChild(DOMsquare);
       row.push(DOMsquare);
@@ -55,7 +55,7 @@ export const Gameboard = (size) => {
   // Currently place it starting from the point clicked and iterate to the right by length
   const place = (x, y, ship) => {
     for (let i = y; i < y + ship.length; i++) {
-      coordinates[x][i] = ship;
+      coords[x][i] = ship;
     }
     ships.push(ship);
   };
@@ -67,33 +67,37 @@ export const Gameboard = (size) => {
     return true;
   };
 
-  const receivedAttack = (x, y) => {
-    if (coordinates[x][y] != "" && coordinates[x][y] != 1) {
-      coordinates[x][y].hit();
-      coordinates[x][y] = 1;
+  const receivedAttack = (y, x) => {
+    if (typeof coords[y][x] == "object") {
+      coords[y][x].hit();
+      coords[y][x] = 1;
     } else {
-      coordinates[x][y] = 0;
+      coords[y][x] = 0;
     }
+    DOM[y][x].click();
   };
 
-  return { coordinates, place, receivedAttack, isGameOver };
+  return { coords, place, receivedAttack, isGameOver };
 };
 
 export const Player = () => {
   const board = Gameboard(10);
+  const attacked = [];
 
+  // attack random piece on board only if it's coords[randomX+randomY] positions are "" or obj
   const randomAttack = (gameboard) => {
-    let randomX, randomY;
+    let randomX, randomY, a, b, c;
     do {
-      randomX = Math.floor(Math.random() * gameboard.coordinates[0].length);
-      randomY = Math.floor(Math.random() * gameboard.coordinates.length);
-    } while (gameboard.coordinates[randomX][randomY] != "");
-    gameboard.receivedAttack(randomX, randomY);
+      randomX = Math.floor(Math.random() * gameboard.coords[0].length);
+      randomY = Math.floor(Math.random() * gameboard.coords.length);
+      c = attacked.indexOf([randomY, randomX]);
+    } while (c == 1);
+    gameboard.receivedAttack(randomY, randomX);
   };
 
   // User attack
-  const attack = (x, y, gameboard) => {
-    gameboard.receivedAttack(x, y);
+  const attack = (y, x, gameboard) => {
+    gameboard.receivedAttack(y, x);
   };
 
   return { attack, randomAttack, board };
@@ -113,8 +117,6 @@ export const Game = () => {
   const compShip2 = Ship(2);
   computer.board.place(3, 2, compShip1);
   computer.board.place(1, 4, compShip2);
-
-  user.attack(4, 0, computer.board);
 
   // Allow user to click enemy board
   return { user, computer };
