@@ -1,4 +1,5 @@
-import { createDOM, allowClicks } from "./DOM.js";
+import { createDOM } from "./createDOM.js";
+import { allowClicks } from "./allowClicks.js";
 
 export const Ship = (length) => {
   let hits = 0;
@@ -9,55 +10,55 @@ export const Ship = (length) => {
   };
 
   const isSunk = () => {
-    if (hits === length) sunk = true;
-    return sunk;
+    return hits === length;
   };
 
   return { hits, length, sunk, hit, isSunk };
 };
 
 export const Gameboard = (size) => {
-  const ships = [],
-    coords = [];
-
-  // Logic board
+  // Create logic board
+  const logicBoard = [];
   for (let row = 0; row < size; row++) {
     const row = [];
     for (let column = 0; column < size; column++) {
       row.push("");
     }
-    coords.push(row);
+    logicBoard.push(row);
   }
 
-  const DOM = createDOM(size);
+  // Create DOM board
+  const domBoard = createDOM(size);
 
-  // Adjust
+  // Add logic to make sure piece is placed within the board
+  // boundaries, and it can be flipped
+  const ships = [];
   const place = (column, row, ship) => {
     for (let i = row; i < row + ship.length; i++) {
-      coords[column][i] = ship;
+      logicBoard[column][i] = ship;
     }
     ships.push(ship);
   };
 
   const isGameOver = () => {
-    ships.forEach((ship) => {
-      if (ship.isSunk() == false) return false;
-    });
+    for (let ship of ships) {
+      if (!ship.isSunk()) return false;
+    }
     return true;
   };
 
   const receivedAttack = (row, column) => {
-    if (typeof coords[row][column] === "object") {
-      coords[row][column].hit();
-      coords[row][column] = 1;
-      DOM[row][column].style.background = "red";
+    if (typeof logicBoard[row][column] === "object") {
+      logicBoard[row][column].hit();
+      logicBoard[row][column] = 1;
+      domBoard[row][column].style.background = "red";
     } else {
-      coords[row][column] = 0;
-      DOM[row][column].style.background = "black";
+      logicBoard[row][column] = 0;
+      domBoard[row][column].style.background = "black";
     }
   };
 
-  return { coords, place, receivedAttack, isGameOver, DOM };
+  return { logicBoard, place, receivedAttack, isGameOver, domBoard };
 };
 
 export const Player = () => {
@@ -65,8 +66,8 @@ export const Player = () => {
   const attacked = [];
   let turn = false;
 
-  const randomizeIndex = () => {
-    return Math.floor(Math.random() * board.coords.length);
+  const randomIndex = () => {
+    return Math.floor(Math.random() * board.logicBoard.length);
   };
 
   const arrayIncludesArray = (arr, subarr) => {
@@ -76,13 +77,12 @@ export const Player = () => {
   const randomAttack = (gameboard) => {
     let attack;
     do {
-      attack = [randomizeIndex(), randomizeIndex()];
+      attack = [randomIndex(), randomIndex()];
     } while (arrayIncludesArray(attacked, attack));
     attacked.push(attack);
     gameboard.receivedAttack(attack[0], attack[1]);
   };
 
-  // User attack
   const attack = (row, column, gameboard) => {
     gameboard.receivedAttack(row, column);
   };
@@ -90,24 +90,31 @@ export const Player = () => {
   return { attack, randomAttack, board, turn };
 };
 
-export const Game = () => {
-  let computer = false;
-
-  // Initialize user's board
+export const Game = (computerPlaying) => {
+  // Initialize boards
   const user = Player();
-  const userShip1 = Ship(3);
-  user.board.place(0, 1, userShip1);
   user.turn = true;
 
-  // Initialize computer's board
   const user2 = Player();
-  const user2Ship = Ship(3);
-  user2.board.place(0, 1, user2Ship);
+
+  // Ship placement
+  const placeShips = (person) => {
+    const ship = Ship(3);
+    const ship2 = Ship(3);
+    const ship3 = Ship(3);
+    person.board.place(0, 1, ship);
+    person.board.place(4, 1, ship2);
+    person.board.place(5, 1, ship3);
+  };
 
   // Allow the user to attack the enemy's board
-  allowClicks(user, user2);
-  allowClicks(user2, user);
+  const allowInteraction = () => {
+    if (computerPlaying) allowClicks(user, user2, computerPlaying);
+    else {
+      allowClicks(user, user2);
+      allowClicks(user2, user);
+    }
+  };
 
-  // Check winner here
-  // no new methods in this object
+  return { placeShips, allowInteraction, user, user2 };
 };
