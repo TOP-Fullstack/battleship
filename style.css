@@ -19,3 +19,14 @@ body {
 .grid > div {
     border: 1px solid black;
 }
+
+h1 {
+    position: absolute;
+    top: 0;
+}
+h1:nth-child(1){
+    margin-right: 200px
+}
+h1:nth-child(2){
+    margin-left: 200px
+}
