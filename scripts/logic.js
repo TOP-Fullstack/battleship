@@ -1,9 +1,7 @@
-import { createDOM } from "./createDOM.js";
-import { allowClicks } from "./allowClicks.js";
+import { createDOM, allowClicks } from "./DOM.js";
 
 export const Ship = (length) => {
   let hits = 0;
-  let sunk = false;
 
   const hit = () => {
     hits++;
@@ -13,7 +11,7 @@ export const Ship = (length) => {
     return hits === length;
   };
 
-  return { hits, length, sunk, hit, isSunk };
+  return { hits, length, hit, isSunk };
 };
 
 export const Gameboard = (size) => {
@@ -30,12 +28,19 @@ export const Gameboard = (size) => {
   // Create DOM board
   const domBoard = createDOM(size);
 
-  // Add logic to make sure piece is placed within the board
-  // boundaries, and it can be flipped
   const ships = [];
-  const place = (column, row, ship) => {
-    for (let i = row; i < row + ship.length; i++) {
-      logicBoard[column][i] = ship;
+  const place = (row, column, ship, orientation) => {
+    // Prevent board from being placed out of bounds
+    if (row + ship.length > 10 || column + ship.length > 10) return false;
+
+    if (orientation == "horizontal") {
+      for (let i = column; i < column + ship.length; i++) {
+        logicBoard[row][i] = ship;
+      }
+    } else {
+      for (let i = row; i < row + ship.length; i++) {
+        logicBoard[i][column] = ship;
+      }
     }
     ships.push(ship);
   };
@@ -61,8 +66,9 @@ export const Gameboard = (size) => {
   return { logicBoard, place, receivedAttack, isGameOver, domBoard };
 };
 
-export const Player = () => {
-  const board = Gameboard(10);
+export const Player = (name, isComputer) => {
+  const username = name;
+  let board = Gameboard(10);
   const attacked = [];
   let turn = false;
 
@@ -87,34 +93,19 @@ export const Player = () => {
     gameboard.receivedAttack(row, column);
   };
 
-  return { attack, randomAttack, board, turn };
-};
-
-export const Game = (computerPlaying) => {
-  // Initialize boards
-  const user = Player();
-  user.turn = true;
-
-  const user2 = Player();
-
   // Ship placement
-  const placeShips = (person) => {
+  const placeShips = (orientation) => {
     const ship = Ship(3);
-    const ship2 = Ship(3);
-    const ship3 = Ship(3);
-    person.board.place(0, 1, ship);
-    person.board.place(4, 1, ship2);
-    person.board.place(5, 1, ship3);
+    board.place(0, 1, ship, orientation);
   };
 
-  // Allow the user to attack the enemy's board
-  const allowInteraction = () => {
-    if (computerPlaying) allowClicks(user, user2, computerPlaying);
-    else {
-      allowClicks(user, user2);
-      allowClicks(user2, user);
-    }
+  return {
+    attack,
+    randomAttack,
+    board,
+    username,
+    placeShips,
+    isComputer,
+    turn,
   };
-
-  return { placeShips, allowInteraction, user, user2 };
 };

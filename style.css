@@ -27,26 +27,18 @@ body {
     border: 1px solid black;
 }
 
-h1 {
-    position: absolute;
-    top: 0;
-}
-h1:nth-child(1){
-    margin-right: 200px
-}
-h1:nth-child(2){
-    margin-left: 200px
-}
-
 .winner-display {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     position: absolute;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.416);
     top: 0;
     transform: translateY(-5%);
-    color: white;
-    font-size: 15vw;
+    color: red;
+    font-size: 5vw;
     visibility: hidden;
     transition: 1s;
+    user-select: none;
 }
